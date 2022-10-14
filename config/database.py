@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, MetaData, inspect
 
 
-DB_URL = 'mysql+pymysql://root:root@localhost:3306/first_db'
+DB_URL = 'postgresql+psycopg2://dev_test:linuxc@localhost:5432/first_db'
 
 
 engine = create_engine(DB_URL)

@@ -9,15 +9,14 @@ user = APIRouter()
 
 @user.post("/signup", tags=["user", "signup"], status_code=200)
 async def create_user(user: UserSchema, response: Response):
-    token = signJWT(user.password)
     try:
         connection.execute(users.insert().values(
             name=user.name,
             email=user.email,
-            password=token['access_token']
+            password=user.password
         ))
         response.status_code = status.HTTP_201_CREATED
-        return token['access_token']
+        return user
     except Exception as err:
         print(err)
         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
@@ -36,7 +35,7 @@ async def create_user(user: UserSchemaWithToken, response: Response):
             ))
             response.status_code = status.HTTP_201_CREATED
         else:
-            if(fuser.email == user.email):
+            if (fuser.email == user.email):
                 response.status_code = status.HTTP_200_OK
         return {"message": 'success'}
     except Exception as err:
@@ -47,13 +46,10 @@ async def create_user(user: UserSchemaWithToken, response: Response):
 
 @ user.post("/login", tags=["user", "login"], status_code=200)
 async def login_user(user: UserLoginSchema, response: Response):
-    token = signJWT(user.password)
     fuser = connection.execute(users.select().where(
         users.c.email == user.email)).first()
-    if(fuser):
-        if(signJWT(user.password)['access_token'].decode(
-                "utf-8") == fuser.password):
-
+    if (fuser):
+        if (user.password == fuser.password):
             response.status_code = status.HTTP_200_OK
             return fuser
         else:
